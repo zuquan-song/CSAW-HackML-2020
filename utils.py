@@ -21,8 +21,9 @@ poisoned_data_filename = 'data/sunglasses_poisoned_data.h5'
 
 class Evaluator:
 
-    def __init__(self, model):
-        self.model = model
+    def __init__(self, model_path):
+        self.model_path = model_path
+        self.model = keras.models.load_model(model_path)
 
     def evaluate(self):
         # evaluate model
