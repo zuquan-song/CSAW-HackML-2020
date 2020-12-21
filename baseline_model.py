@@ -1,27 +1,19 @@
 import os
 import tensorflow as tf
-import numpy as np
-from architecture import *
-import h5py
+import sys
 import tensorflow_model_optimization as tfmot
 import tempfile
 from keras.models import load_model
+from utils import *
 
+clean_data_filename = str(sys.argv[1])
+model_filename = str(sys.argv[2])
 
-rdir = "."
-poisoned_data_filename = 'data/sunglasses_poisoned_data.h5'
-clean_validation_filename = 'data/clean_validation_data.h5'
-clean_test_filename = 'data/clean_test_data.h5'
-
-
-poisoned_model_filename = 'models/sunglasses_bd_net.h5'
-poisoned_model_weights = 'models/sunglasses_bd_weights.h5'
-
+retrained_data_filename = 'data/clean_validation_data.h5'
 repaired_model_filename = "repaired_model.h5"
-repaired_model_weights = "repaired_model_weight.h5"
+
 
 class BaselineModel:
-
     def __init__(self, *args, **kwargs):
         self.origin_model = kwargs['poisoned']
         self.repaired_model = kwargs['repaired']
@@ -33,28 +25,8 @@ class BaselineModel:
         return np.array([a if a == b else self.N for a, b in zip(origin_result, repaired_result)])
 
 
-def data_loader(filepath):
-    data = h5py.File(filepath, 'r')
-    x_data = np.array(data['data'])
-    y_data = np.array(data['label'])
-    x_data = x_data.transpose((0,2,3,1))
-
-    return x_data, y_data
-
-def data_preprocess(x_data):
-    return x_data/255
-
 if __name__ == '__main__':
-    # bd_model = Net()
-    bd_model = load_model(poisoned_model_filename)
-    bd_model.load_weights(os.path.join(rdir, poisoned_model_weights))
-
-    # original attack success
-    poisoned_x, poisoned_y = data_loader(poisoned_data_filename)
-    poisoned_x = data_preprocess(poisoned_x)
-    clean_label_p = np.argmax(bd_model.predict(poisoned_x), axis=1)
-    class_accu = np.mean(np.equal(clean_label_p, poisoned_y))*100
-    print('original attack success rate:', class_accu)
+    bd_model = load_model(model_filename)
 
     num_images = 12830
     batch_size = 32
@@ -67,8 +39,8 @@ if __name__ == '__main__':
                                                                  end_step=end_step)
     }
 
-    clean_x, clean_y = data_loader(clean_validation_filename)
-    clean_x = data_preprocess(clean_x)
+    retrained_x, retrained_y = data_loader(retrained_data_filename)
+    retrained_x = data_preprocess(retrained_x)
 
     # create repaired model
     def apply_pruning_to_dense(layer):
@@ -76,40 +48,39 @@ if __name__ == '__main__':
             return tfmot.sparsity.keras.prune_low_magnitude(layer, **pruning_params)
         return layer
 
-    tmp_model = load_model(poisoned_model_filename)
-    tmp_model.load_weights(os.path.join(rdir, poisoned_model_weights))
-    repaired_model = tf.keras.models.clone_model(
-        tmp_model,
-        clone_function=apply_pruning_to_dense,
-    )
-
-    repaired_model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
-                              loss=tf.keras.losses.sparse_categorical_crossentropy,
-                              metrics=['accuracy'])
-    callback = [
-      tfmot.sparsity.keras.UpdatePruningStep(),
-      tfmot.sparsity.keras.PruningSummaries(log_dir=tempfile.mkdtemp()),
-    ]
-    repaired_model.fit(
-        clean_x,
-        clean_y,
-        epochs=5,
-        callbacks=callback,
-    )
+    if not os.path.exists(repaired_model_filename):
+        tmp_model = load_model(poisoned_model_filename)
+        def apply_pruning_to_dense(layer):
+            if layer.name in ['fc_2']:
+                return tfmot.sparsity.keras.prune_low_magnitude(layer, **pruning_params)
+            return layer
+        repaired_model = tf.keras.models.clone_model(
+            tmp_model,
+            clone_function=apply_pruning_to_dense,
+        )
+        repaired_model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
+                                  loss=tf.keras.losses.sparse_categorical_crossentropy,
+                                  metrics=['accuracy'])
+        callback = [
+          tfmot.sparsity.keras.UpdatePruningStep(),
+          tfmot.sparsity.keras.PruningSummaries(log_dir=tempfile.mkdtemp()),
+        ]
+        repaired_model.fit(
+            retrained_x,
+            retrained_y,
+            epochs=5,
+            callbacks=callback,
+        )
+        # repaired_model.save(repaired_model_filename)
+    else:
+        repaired_model = load_model(repaired_model_filename)
 
     # create baseline model based on bd_model + repaired_model
     model = BaselineModel(poisoned=bd_model, repaired=repaired_model, N=1283)
 
-    # test model based on clean data
-    y_result = model.predict(clean_x)
-    accuracy = sum(y_result == clean_y) * 1.0 / len(clean_y)
-    print("accuracy: {}".format(accuracy))
+    test_x, test_y = data_loader(clean_data_filename)
+    test_x = data_preprocess(test_x)
+    result_x = model.predict(test_x)
 
-    # test model based on poisoned data
-    poisoned_x, poisoned_y = data_loader(poisoned_data_filename)
-    poisoned_x = data_preprocess(poisoned_x)
-    y_result = model.predict(poisoned_x)
-    attack_success_rate = sum(y_result == poisoned_y) * 1.0 / len(poisoned_y)
-    print("attack_success_rate: {}".format(attack_success_rate))
-    trigger_detection_rate = sum(y_result == 1284) * 1.0 / len(poisoned_y)
-    print("trigger_detection_rate: {}".format(trigger_detection_rate))
+    class_accu = np.mean(np.equal(result_x, test_y))*100
+    print('Classification accuracy:', class_accu)
