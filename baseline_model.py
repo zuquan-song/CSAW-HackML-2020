@@ -6,17 +6,18 @@ import tempfile
 from keras.models import load_model
 from utils import *
 import keras as K
+from itertools import chain
 
 
 retrained_data_filename = 'data/clean_validation_data.h5'
-repaired_model_filename = "models/repaired_model_baseline.h5"
+repaired_model_filename = "data/repaired_model_baseline.h5"
 
 
 class BaselineModel:
     def __init__(self, *args, **kwargs):
         self.origin_model = kwargs['poisoned']
         self.repaired_model = kwargs['repaired']
-        self.N = kwargs['N'] + 1
+        self.N = kwargs['N']
 
     def predict(self, data):
         origin_result = np.argmax(self.origin_model.predict(data), axis=1)
@@ -27,7 +28,6 @@ class BaselineModel:
 if __name__ == '__main__':
     clean_data_filename = str(sys.argv[1])
     model_filename = str(sys.argv[2])
-
     bd_model = load_model(model_filename)
 
     num_images = 12830
@@ -43,18 +43,27 @@ if __name__ == '__main__':
 
     retrained_x, retrained_y = data_loader(retrained_data_filename)
     retrained_x = data_preprocess(retrained_x)
+    result_y = np.argmax(bd_model.predict(retrained_x), axis=1)
+    origin_acc = np.mean(np.equal(result_y, retrained_y)) * 100
 
-    # create repaired model
-    def apply_pruning_to_dense(layer):
-        if layer.name in ['fc_2']:
-            return tfmot.sparsity.keras.prune_low_magnitude(layer, **pruning_params)
-        return layer
+    cur_acc = origin_acc
+    percentile = 0
+    acc_decrease_threshold = 5
+    percentile_thresh = 80
+    while origin_acc - cur_acc < acc_decrease_threshold and percentile <= percentile_thresh:
+        percentile += 3
+        # create repaired model
+        tmp_model = load_model(model_filename)
+        def pruning(p, weights):
+            thresh = np.percentile(weights[-1], p)
+            super_threshold_indices = weights[-1] < thresh
+            weights[-1][super_threshold_indices] = 0
+            return weights
 
-    if not os.path.exists(repaired_model_filename):
-        tmp_model = load_model(poisoned_model_filename)
         def apply_pruning_to_dense(layer):
             if layer.name in ['fc_2']:
-                return tfmot.sparsity.keras.prune_low_magnitude(layer, **pruning_params)
+                layer.set_weights(pruning(percentile, layer.get_weights()))
+                # return tfmot.sparsity.keras.prune_low_magnitude(layer, **pruning_params)
             return layer
         repaired_model = tf.keras.models.clone_model(
             tmp_model,
@@ -70,26 +79,25 @@ if __name__ == '__main__':
         repaired_model.fit(
             retrained_x,
             retrained_y,
-            epochs=10,
+            epochs=3,
             callbacks=callback,
         )
-        repaired_model = tfmot.sparsity.keras.strip_pruning(repaired_model)
 
-        tf.keras.models.save_model(repaired_model, repaired_model_filename, include_optimizer=False)
-        # repaired_model.save(repaired_model_filename)
-    else:
-        repaired_model = K.models.load_model(repaired_model_filename)
-        repaired_model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
-                         loss=tf.keras.losses.sparse_categorical_crossentropy,
-                         metrics=['accuracy'])
+        # load model
+        # repaired_model = K.models.load_model(repaired_model_filename)
+        # repaired_model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
+        #                  loss=tf.keras.losses.sparse_categorical_crossentropy,
+        #                  metrics=['accuracy'])
 
-    # create baseline model based on bd_model + repaired_model
-    model = BaselineModel(poisoned=bd_model, repaired=repaired_model, N=1283)
+        # create baseline model based on bd_model + repaired_model
+        model = BaselineModel(poisoned=bd_model, repaired=repaired_model, N=1283)
 
-    test_x, test_y = data_loader(clean_data_filename)
-    test_x = data_preprocess(test_x)
-    result_x = model.predict(test_x)
+        test_x, test_y = data_loader(clean_data_filename)
+        test_x = data_preprocess(test_x)
+        result_x = model.predict(test_x)
 
-    class_accu = np.mean(np.equal(result_x, test_y))*100
-    print('Classification accuracy:', class_accu)
+        cur_acc = np.mean(np.equal(result_x, test_y))*100
+        print('Classification accuracy:{} percentile:{}'.format(cur_acc, percentile))
 
+    repaired_model = tfmot.sparsity.keras.strip_pruning(repaired_model)
+    tf.keras.models.save_model(repaired_model, repaired_model_filename, include_optimizer=False)

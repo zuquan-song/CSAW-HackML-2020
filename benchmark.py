@@ -3,7 +3,7 @@ import keras
 from baseline_model import BaselineModel
 from utils import *
 def baseline_model():
-    repaired_model_filename = "models/repaired_model_baseline.h5"
+    repaired_model_filename = "data/repaired_model_baseline.h5"
     poisoned_model_filename = "models/sunglasses_bd_net.h5"
 
     bd_model = keras.models.load_model(poisoned_model_filename)

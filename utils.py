@@ -16,7 +16,6 @@ def data_preprocess(x_data):
 
 
 clean_test_filename = 'data/clean_test_data.h5'
-poisoned_model_filename = 'models/sunglasses_bd_net.h5'
 poisoned_data_filename = 'data/sunglasses_poisoned_data.h5'
 
 
@@ -50,5 +49,5 @@ class Evaluator:
         y_bar = self.model.predict(poisoned_x)
         attack_success_rate = sum(y_bar == poisoned_y) * 1.0 / len(poisoned_y)
         print("attack_success_rate: {}".format(attack_success_rate))
-        trigger_detection_rate = sum(y_bar == 1284) * 1.0 / len(poisoned_y)
+        trigger_detection_rate = sum(y_bar == 1283) * 1.0 / len(poisoned_y)
         print("trigger_detection_rate: {}".format(trigger_detection_rate))

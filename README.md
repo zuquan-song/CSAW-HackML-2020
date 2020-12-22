@@ -17,7 +17,7 @@ CSAW-HackML-2020 -- report
 # How to Test Your Validation Data Accuracy
 ```
    To test the accuracy of baseline_model, use command:
-    python baseline_model.py [your_test_data_filename] [your_net_filename] 
+    python baseline_model.py [clean_validation_data_filename] [poisoned_net_filename] 
    
    eg: python baseline_model.py data/clean_test_data.h5 models/sunglasses_bd_net.h5 
 ```
