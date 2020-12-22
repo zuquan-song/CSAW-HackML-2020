@@ -64,7 +64,7 @@ class Visualizer:
 
         ax.set_ylabel('Percent')
         ax.set_xticks(x * 0.8)
-        ax.set_xticklabels(list(df.index))
+        ax.set_xticklabels(np.array(list(self.df.index)))
         ax.legend(models, loc="lower center", bbox_to_anchor=(0.5, -0.3))
 
         fig.tight_layout()
