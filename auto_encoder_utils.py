@@ -15,7 +15,6 @@ class AutoEncoder:
         reconstructions = self.auto_encoder.predict(self.retrained_x)
         train_loss = keras.losses.mae(reconstructions, self.retrained_x)
         self.threshold = np.mean(train_loss) + np.std(train_loss) + 0.03
-        print(self.threshold)
 
     def encoder_predict(self, input_x):
         '''
@@ -37,6 +36,20 @@ class AutoEncoder:
         return res
 
 
+class AutoEncoderRepairedModel:
+
+    def __init__(self, autoencoder, repaired):
+        self.AE = autoencoder
+        self.repaired = repaired
+
+    def predict(self, x):
+        mask = self.AE.encoder_predict(x)
+        y_hat = np.argmax(self.repaired.predict(x), axis=1)
+        y_hat[mask == 0] = 1283
+        return y_hat
+
+
+'''
 def final_predict(autoencoder, repaired_model, x):
     mask = autoencoder.encoder_predict(x)
     y_hat = np.argmax(repaired_model.predict(x), axis=1)
@@ -45,6 +58,7 @@ def final_predict(autoencoder, repaired_model, x):
 
 
 if __name__ == '__main__':
+
     AE = AutoEncoder()
     repaired_model = keras.models.load_model("fixed_model/pruning.h5")
     retrained_x, retrained_y = data_loader(retrained_data_filename)
@@ -52,3 +66,4 @@ if __name__ == '__main__':
     retrained_y_hat =   final_predict(AE,repaired_model,retrained_x)
     print(np.mean(np.equal(retrained_y_hat, retrained_y)) * 100)
 
+'''
