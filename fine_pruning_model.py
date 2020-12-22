@@ -87,7 +87,7 @@ if __name__ == '__main__':
         )
 
         # create baseline model based on bd_model + repaired_model
-        model = RandomPruningModel(poisoned=bd_model, repaired=repaired_model, N=1283)
+        model = FinePruningModel(poisoned=bd_model, repaired=repaired_model, N=1283)
 
         test_x, test_y = data_loader(clean_data_filename)
         test_x = data_preprocess(test_x)
