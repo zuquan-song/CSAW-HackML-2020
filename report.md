@@ -30,4 +30,10 @@ CSAW Project Report
 ├── requirements.txt
 └── utils.py # contains model evaluation class
 ```
+### Baseline Repaired Model
+#### Pipeline
 
+#### Source
+ - Liu, Kang, Brendan Dolan-Gavitt, and Siddharth Garg. "Fine-pruning: Defending against backdooring attacks on deep neural networks." International Symposium on Research in Attacks, Intrusions, and Defenses. Springer, Cham, 2018.
+
+#### Performance

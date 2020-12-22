@@ -10,7 +10,7 @@ from itertools import chain
 
 
 retrained_data_filename = 'data/clean_validation_data.h5'
-repaired_model_filename = "models/repaired_model_baseline.h5"
+repaired_model_filename = "data/repaired_model_baseline.h5"
 
 
 class BaselineModel:
