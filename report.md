@@ -31,8 +31,28 @@ CSAW Project Report
 └── utils.py # contains model evaluation class
 ```
 ### Baseline Repaired Model
-#### Pipeline
+#### Assumption
+We may assume that the attacker tried to use the pruning aware attack strategy.
+In this strategy the attacker implement the four step:
+1. Trains the baseline DNN on a clean training data set;
+2. Prunes the DNN by eliminating dormant neurons;
+3. Re-trains the pruned DNN, but this time with the poisoned training dataset.
+4. Re-instating all pruned neurons back into the network along with the associated weights and biases
 
+In our case, the attacker implemented a targeted backdoor attack on face recognition where a specific pair of sunglasses in badnet B1.
+And in bad net B2, B3, the attacker using the attack strategy discussed above.
+#### Pipeline
+According to the assumption, we performed a fine-pruning defense on B1, also in B2, B3.
+
+Firstly, we use the weights from attacker and load it with bad net, this step is used for fine-tune.
+
+Then we use validation data to train the badnet and iteratively prunes neurons from the DNN in increasing order of average activations and records the accuracy of the pruned network in each iteration. Remove the removes decoy neurons.
+
+Finally, we use validation data to fine-tune the model and produce a repaired one.
+
+To recognize the backdoor as an N + 1 class, we compare the predict result from original badnet and repaired one, if the output class is the same, it shows that the original data is not tainted by sunglasses, else it can be recognized as an N + 1 class. 
+#### Result
+After the fine-pruning step, the accuracy of the repaired model on test data is .
 #### Source
  - Liu, Kang, Brendan Dolan-Gavitt, and Siddharth Garg. "Fine-pruning: Defending against backdooring attacks on deep neural networks." International Symposium on Research in Attacks, Intrusions, and Defenses. Springer, Cham, 2018.
 
