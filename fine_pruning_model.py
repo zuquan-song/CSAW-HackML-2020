@@ -10,10 +10,10 @@ from itertools import chain
 
 
 retrained_data_filename = 'data/clean_validation_data.h5'
-repaired_model_filename = "data/repaired_model_baseline.h5"
+repaired_model_filename = "data/fine_pruning_model_G1.h5"
 
 
-class BaselineModel:
+class FinePruningModel:
     def __init__(self, *args, **kwargs):
         self.origin_model = kwargs['poisoned']
         self.repaired_model = kwargs['repaired']
@@ -28,6 +28,9 @@ class BaselineModel:
 if __name__ == '__main__':
     clean_data_filename = str(sys.argv[1])
     model_filename = str(sys.argv[2])
+    if len(sys.argv) > 3:
+        repaired_model_filename = str(sys.argv[3])
+
     bd_model = load_model(model_filename)
 
     num_images = 12830
@@ -79,18 +82,12 @@ if __name__ == '__main__':
         repaired_model.fit(
             retrained_x,
             retrained_y,
-            epochs=3,
+            epochs=10,
             callbacks=callback,
         )
 
-        # load model
-        # repaired_model = K.models.load_model(repaired_model_filename)
-        # repaired_model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
-        #                  loss=tf.keras.losses.sparse_categorical_crossentropy,
-        #                  metrics=['accuracy'])
-
         # create baseline model based on bd_model + repaired_model
-        model = BaselineModel(poisoned=bd_model, repaired=repaired_model, N=1283)
+        model = RandomPruningModel(poisoned=bd_model, repaired=repaired_model, N=1283)
 
         test_x, test_y = data_loader(clean_data_filename)
         test_x = data_preprocess(test_x)
