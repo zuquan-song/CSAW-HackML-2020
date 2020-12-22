@@ -19,6 +19,14 @@ clean_test_filename = 'data/clean_test_data.h5'
 poisoned_model_filename = 'models/sunglasses_bd_net.h5'
 poisoned_data_filename = 'data/sunglasses_poisoned_data.h5'
 
+
+"""
+    Model Requirement:
+        model should have a method named "predict", which returns the predict class (NOT probabilities of all classes)
+    Usage: 
+        e = Evaluator(model)
+        e.evaluate()
+"""
 class Evaluator:
 
     def __init__(self, model_path):
