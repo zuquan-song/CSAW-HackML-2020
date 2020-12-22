@@ -1,6 +1,6 @@
 import numpy as np
 import h5py
-
+import keras
 
 
 def data_loader(filepath):
@@ -26,13 +26,23 @@ poisoned_data_filename = 'data/sunglasses_poisoned_data.h5'
         e = Evaluator(model)
         e.evaluate()
 """
+
+
+class EvaluateResult(object):
+
+    def __init__(self, **kwargs):
+        self.kv = {}
+        for k, v in kwargs.items():
+            self.kv[k] = v
+
 class Evaluator:
 
-    def __init__(self, model_path=None, model = None):
+    def __init__(self, model_path=None, model = None, model_name='default'):
         if model:
             self.model = model
         else:
             self.model = keras.models.load_model(model_path)
+        self.model_name = model_name
 
     def evaluate(self):
         # evaluate model
@@ -53,3 +63,10 @@ class Evaluator:
         print("attack_success_rate: {}".format(attack_success_rate))
         trigger_detection_rate = sum(y_bar == 1283) * 1.0 / len(poisoned_y)
         print("trigger_detection_rate: {}".format(trigger_detection_rate))
+
+        return EvaluateResult(
+            model_name=self.model_name,
+            clean_acc=accuracy,
+            attack_succ_rate=attack_success_rate,
+            trigger_detect_rate=trigger_detection_rate
+        )

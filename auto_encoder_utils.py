@@ -1,5 +1,4 @@
 import keras
-from baseline_model import retrained_data_filename
 from utils import data_loader, data_preprocess
 import numpy as np
 
@@ -10,10 +9,13 @@ class AutoEncoder:
     def __init__(self):
         self.auto_encoder = keras.models.load_model(auto_encoder_model_filename)
         self.auto_encoder.compile(optimizer='adam', loss='mean_squared_error')
-        self.retrained_x, self.retrained_y = data_loader(retrained_data_filename)
-        self.retrained_x = data_preprocess(self.retrained_x)
-        reconstructions = self.auto_encoder.predict(self.retrained_x)
-        train_loss = keras.losses.mae(reconstructions, self.retrained_x)
+        self.threshold = 0.09179428238229165
+
+    def reset_threshold(self, retrained_data_filename):
+        retrained_x, retrained_y = data_loader(retrained_data_filename)
+        retrained_x = data_preprocess(retrained_x)
+        reconstructions = self.auto_encoder.predict(retrained_x)
+        train_loss = keras.losses.mae(reconstructions, retrained_x)
         self.threshold = np.mean(train_loss) + np.std(train_loss) + 0.03
 
     def encoder_predict(self, input_x):
@@ -38,13 +40,13 @@ class AutoEncoder:
 
 class AutoEncoderRepairedModel:
 
-    def __init__(self, autoencoder, repaired):
+    def __init__(self, autoencoder, repaired_model):
         self.AE = autoencoder
-        self.repaired = repaired
+        self.repaired_model = repaired_model
 
     def predict(self, x):
         mask = self.AE.encoder_predict(x)
-        y_hat = np.argmax(self.repaired.predict(x), axis=1)
+        y_hat = np.argmax(self.repaired_model.predict(x), axis=1)
         y_hat[mask == 0] = 1283
         return y_hat
 
