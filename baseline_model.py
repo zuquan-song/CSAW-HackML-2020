@@ -5,12 +5,11 @@ import tensorflow_model_optimization as tfmot
 import tempfile
 from keras.models import load_model
 from utils import *
+import keras as K
 
-clean_data_filename = str(sys.argv[1])
-model_filename = str(sys.argv[2])
 
 retrained_data_filename = 'data/clean_validation_data.h5'
-repaired_model_filename = "repaired_model.h5"
+repaired_model_filename = "models/repaired_model_baseline.h5"
 
 
 class BaselineModel:
@@ -26,6 +25,9 @@ class BaselineModel:
 
 
 if __name__ == '__main__':
+    clean_data_filename = str(sys.argv[1])
+    model_filename = str(sys.argv[2])
+
     bd_model = load_model(model_filename)
 
     num_images = 12830
@@ -68,12 +70,18 @@ if __name__ == '__main__':
         repaired_model.fit(
             retrained_x,
             retrained_y,
-            epochs=5,
+            epochs=10,
             callbacks=callback,
         )
+        repaired_model = tfmot.sparsity.keras.strip_pruning(repaired_model)
+
+        tf.keras.models.save_model(repaired_model, repaired_model_filename, include_optimizer=False)
         # repaired_model.save(repaired_model_filename)
     else:
-        repaired_model = load_model(repaired_model_filename)
+        repaired_model = K.models.load_model(repaired_model_filename)
+        repaired_model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
+                         loss=tf.keras.losses.sparse_categorical_crossentropy,
+                         metrics=['accuracy'])
 
     # create baseline model based on bd_model + repaired_model
     model = BaselineModel(poisoned=bd_model, repaired=repaired_model, N=1283)
@@ -84,3 +92,4 @@ if __name__ == '__main__':
 
     class_accu = np.mean(np.equal(result_x, test_y))*100
     print('Classification accuracy:', class_accu)
+
