@@ -15,6 +15,25 @@ def data_preprocess(x_data):
     return x_data/255
 
 
+<<<<<<< HEAD
+=======
+def pruning(p, weights):
+    thresh = np.percentile(weights[-1], p)
+    super_threshold_indices = weights[-1] < thresh
+    weights[-1][super_threshold_indices] = 0
+    return weights
+
+def apply_pruning_to_dense(layer):
+    if layer.name in ['fc_2']:
+        layer.set_weights(pruning(percentile, layer.get_weights()))
+    return layer
+
+
+clean_test_filename = 'data/clean_test_data.h5'
+# poisoned_data_filename = 'data/sunglasses_poisoned_data.h5'
+poisoned_data_filename = 'data/anonymous_1_poisoned_data.h5'
+
+
 """
     Model Requirement:
         model should have a method named "predict", which returns the predict class (NOT probabilities of all classes)
@@ -22,8 +41,6 @@ def data_preprocess(x_data):
         e = Evaluator(model)
         e.evaluate()
 """
-
-
 class EvaluateResult(object):
 
     def __init__(self, **kwargs):
@@ -68,3 +85,37 @@ class Evaluator:
             attack_succ_rate=attack_success_rate,
             trigger_detect_rate=trigger_detection_rate
         )
+
+class Visualizer:
+    def __init__(self, df):
+        self.df = df
+
+    def saveToFile(self):
+        def autolabel(rects):
+            """Attach a text label above each bar in *rects*, displaying its height."""
+            for rect in rects:
+                height = rect.get_height()
+                ax.annotate('{}'.format(height),
+                            xy=(rect.get_x() + rect.get_width() / 2, height),
+                            xytext=(0, 3),  # 3 points vertical offset
+                            textcoords="offset points",
+                            ha='center', va='bottom')
+        self.df = (self.df * 100).round(2)
+        n = len(self.df)
+        models = self.df.columns
+
+        width = .35
+        x = np.arange(n)
+        fig, ax = plt.subplots()
+
+
+        for i, model_name in enumerate(models):
+            autolabel(ax.bar(x * 0.8 - width / 2 + i * width/2, self.df[model_name], width/2, label=model_name))
+
+        ax.set_ylabel('Percent')
+        ax.set_xticks(x * 0.8)
+        ax.set_xticklabels(np.array(list(self.df.index)))
+        ax.legend(models, loc="lower center", bbox_to_anchor=(0.5, -0.3))
+
+        fig.tight_layout()
+        plt.show()
