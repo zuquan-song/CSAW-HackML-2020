@@ -15,24 +15,11 @@ def data_preprocess(x_data):
     return x_data/255
 
 
-<<<<<<< HEAD
-=======
 def pruning(p, weights):
     thresh = np.percentile(weights[-1], p)
     super_threshold_indices = weights[-1] < thresh
     weights[-1][super_threshold_indices] = 0
     return weights
-
-def apply_pruning_to_dense(layer):
-    if layer.name in ['fc_2']:
-        layer.set_weights(pruning(percentile, layer.get_weights()))
-    return layer
-
-
-clean_test_filename = 'data/clean_test_data.h5'
-# poisoned_data_filename = 'data/sunglasses_poisoned_data.h5'
-poisoned_data_filename = 'data/anonymous_1_poisoned_data.h5'
-
 
 """
     Model Requirement:

@@ -54,6 +54,11 @@ if __name__ == '__main__':
     acc_decrease_threshold = 5
     percentile_thresh = 80
     while origin_acc - cur_acc < acc_decrease_threshold and percentile <= percentile_thresh:
+        def apply_pruning_to_dense(layer):
+            if layer.name in ['fc_2']:
+                layer.set_weights(pruning(percentile, layer.get_weights()))
+            return layer
+
         percentile += 10
         # create repaired model
         tmp_model = load_model(model_filename)
