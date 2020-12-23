@@ -69,17 +69,7 @@ if __name__ == '__main__':
         percentile += 3
         # create repaired model
         tmp_model = load_model(model_filename)
-        def pruning(p, weights):
-            thresh = np.percentile(weights[-1], p)
-            super_threshold_indices = weights[-1] < thresh
-            weights[-1][super_threshold_indices] = 0
-            return weights
 
-        def apply_pruning_to_dense(layer):
-            if layer.name in ['fc_2']:
-                layer.set_weights(pruning(percentile, layer.get_weights()))
-                # return tfmot.sparsity.keras.prune_low_magnitude(layer, **pruning_params)
-            return layer
         repaired_model = tf.keras.models.clone_model(
             tmp_model,
             clone_function=apply_pruning_to_dense,
