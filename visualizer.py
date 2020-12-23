@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-
+import numpy as np
 class Visualizer:
     def __init__(self, df):
         self.df = df
@@ -15,16 +15,16 @@ class Visualizer:
                             textcoords="offset points",
                             ha='center', va='bottom')
         self.df = (self.df * 100).round(2)
-        n = len(self.df)
+        n = len(self.df.index)
         models = self.df.columns
 
-        width = .35
+        width = .2
         x = np.arange(n)
         fig, ax = plt.subplots()
 
-
         for i, model_name in enumerate(models):
-            autolabel(ax.bar(x * 0.8 - width / 2 + i * width/2, self.df[model_name], width/2, label=model_name))
+            print(len(x - width + i * width/2), len(self.df[model_name]))
+            autolabel(ax.bar(x - width + i * width/2, self.df[model_name], width/2, label=model_name))
 
         ax.set_ylabel('Percent')
         ax.set_xticks(x * 0.8)

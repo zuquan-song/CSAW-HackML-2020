@@ -17,11 +17,20 @@ CSAW-HackML-2020 -- report
 # How to Test The Validation Data Accuracy
 
 ## How to train a repaired model from a badnet
-- We accept two parameters for all model files "xx_model.py", command like this:
+- We accept three parameters for all model files "xx_model.py", command like this:
 ```
 First parameter is used to load retrained validation data, second parameter is used to load poisoned model:
-python baseline_model.py [clean_validation_data_filename] [poisoned_net_filename] [output_model_filename]
-eg: python fine_pruning_model.py data/clean_test_data.h5 models/sunglasses_bd_net.h5 data/fine_pruning_model_G1.h5
+python fine_pruning_model.py [clean_validation_data_filename] [poisoned_net_filename] [output_model_filename]
+eg: 
+python random_pruning_model.py data/clean_validation_data.h5 models/anonymous_1_bd_net.h5 data/random_pruning_model_for_anonymous_1_bd_net.h5
+python random_pruning_model.py data/clean_validation_data.h5 models/anonymous_2_bd_net.h5 data/random_pruning_model_for_anonymous_2_bd_net.h5
+python random_pruning_model.py data/clean_validation_data.h5 models/multi_trigger_multi_target_bd_net.h5 data/random_pruning_model_for_multi_trigger_bd_net.h5
+python random_pruning_model.py data/clean_validation_data.h5 models/sunglasses_bd_net.h5 data/random_pruning_model_for_sunglasses_bd_net.h5
+
+python fine_pruning_model.py data/clean_validation_data.h5 models/anonymous_1_bd_net.h5 data/fine_pruning_model_for_anonymous_1_bd_net.h5
+python fine_pruning_model.py data/clean_validation_data.h5 models/anonymous_2_bd_net.h5 data/fine_pruning_model_for_anonymous_2_bd_net.h5
+python fine_pruning_model.py data/clean_validation_data.h5 models/multi_trigger_multi_target_bd_net.h5 data/fine_pruning_model_for_multi_trigger_bd_net.h5
+python fine_pruning_model.py data/clean_validation_data.h5 models/sunglasses_bd_net.h5 data/fine_pruning_model_for_sunglasses_bd_net.h5
 ```
 - These files would produce an output model to file `output_model_filename` which could be used to test the performance
 
@@ -37,6 +46,11 @@ eg: python rule_based_model_eval.py data/clean_test_data.h5 models/sunglasses_bd
 python autoencoder_based_model_eval.py [test_data_filename] [repaired_model_filename]
 
 eg: python autoencoder_based_model_eval.py data/clean_test_data.h5 fixed_models/random_pruning_model_for_anonymous_1_bd_net.h5
+```
+
+## How to Run the report result
+```
+python benchmark.py
 ```
 
 
