@@ -75,14 +75,14 @@ if __name__ == '__main__':
     )
 
     # create baseline model based on bd_model + repaired_model
-    model = RandomPruningModel(poisoned=bd_model, repaired=repaired_model, N=1283)
-
-    test_x, test_y = data_loader(clean_data_filename)
-    test_x = data_preprocess(test_x)
-    result_x = model.predict(test_x)
-
-    cur_acc = np.mean(np.equal(result_x, test_y))*100
-    print('Classification accuracy:{}'.format(cur_acc))
+    # model = RandomPruningModel(poisoned=bd_model, repaired=repaired_model, N=1283)
+    #
+    # test_x, test_y = data_loader(clean_data_filename)
+    # test_x = data_preprocess(test_x)
+    # result_x = model.predict(test_x)
+    #
+    # cur_acc = np.mean(np.equal(result_x, test_y))*100
+    # print('Classification accuracy:{}'.format(cur_acc))
 
     repaired_model = tfmot.sparsity.keras.strip_pruning(repaired_model)
     tf.keras.models.save_model(repaired_model, repaired_model_filename, include_optimizer=False)

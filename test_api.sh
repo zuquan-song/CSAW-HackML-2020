@@ -1,0 +1,4 @@
+python rule_based_model_eval.py data/clean_test_data.h5 models/sunglasses_bd_net.h5 fixed_models/random_pruning_model_for_anonymous_1_bd_net.h5
+python rule_based_model_eval.py data/clean_test_data.h5 models/sunglasses_bd_net.h5 fixed_models/fine_pruning_model_for_anonymous_1_bd_net.h5
+python autoencoder_based_model_eval.py data/clean_test_data.h5 fixed_models/random_pruning_model_for_anonymous_1_bd_net.h5
+python autoencoder_based_model_eval.py data/clean_test_data.h5 fixed_models/fine_pruning_model_for_anonymous_1_bd_net.h5

@@ -13,18 +13,6 @@ retrained_data_filename = 'data/clean_validation_data.h5'
 repaired_model_filename = "data/fine_pruning_model_G1.h5"
 
 
-class FinePruningModel:
-    def __init__(self, *args, **kwargs):
-        self.origin_model = kwargs['poisoned']
-        self.repaired_model = kwargs['repaired']
-        self.N = kwargs['N']
-
-    def predict(self, data):
-        origin_result = np.argmax(self.origin_model.predict(data), axis=1)
-        repaired_result = np.argmax(self.repaired_model.predict(data), axis=1)
-        return np.array([a if a == b else self.N for a, b in zip(origin_result, repaired_result)])
-
-
 if __name__ == '__main__':
     clean_data_filename = str(sys.argv[1])
     model_filename = str(sys.argv[2])
@@ -53,6 +41,9 @@ if __name__ == '__main__':
     percentile = 0
     acc_decrease_threshold = 5
     percentile_thresh = 80
+
+    test_x, test_y = data_loader(clean_data_filename)
+    test_x = data_preprocess(test_x)
     while origin_acc - cur_acc < acc_decrease_threshold and percentile <= percentile_thresh:
         def apply_pruning_to_dense(layer):
             if layer.name in ['fc_2']:
@@ -82,13 +73,10 @@ if __name__ == '__main__':
         )
 
         # create baseline model based on bd_model + repaired_model
-        model = FinePruningModel(poisoned=bd_model, repaired=repaired_model, N=1283)
+        # model = FinePruningModel(poisoned=bd_model, repaired=repaired_model, N=1283)
+        result_y = np.argmax(repaired_model.predict(test_x), axis=1)
 
-        test_x, test_y = data_loader(clean_data_filename)
-        test_x = data_preprocess(test_x)
-        result_x = model.predict(test_x)
-
-        cur_acc = np.mean(np.equal(result_x, test_y))*100
+        cur_acc = np.mean(np.equal(result_y, test_y))*100
         print('Classification accuracy:{} percentile:{}'.format(cur_acc, percentile))
 
     repaired_model = tfmot.sparsity.keras.strip_pruning(repaired_model)

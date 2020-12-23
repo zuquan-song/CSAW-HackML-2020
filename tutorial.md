@@ -30,7 +30,7 @@ eg: python fine_pruning_model.py data/clean_test_data.h5 models/sunglasses_bd_ne
 ### random_pruning and fine_pruning model
 ```
 python [random_pruning_eval.py|fine_pruning_eval.py] [test_data_filename] [poisoned_model_filename] [repaired_model_filename]
-eg: python random_pruning_eval.py data/clean_test_data.h5 models/sunglass_bd_net.h5 data/repaired_random_pruning_model_G1.h5
+eg: python random_pruning_eval.py data/clean_test_data.h5 models/sunglass_bd_net.h5 fixed_models/repaired_random_pruning_model_G1.h5
 ```
 
 

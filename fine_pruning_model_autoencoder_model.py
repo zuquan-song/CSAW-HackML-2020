@@ -20,10 +20,8 @@ class FinePruningModelGeneral:
         self.repaired_model = kwargs['repaired']
         self.N = kwargs['N']
         self.auto = kwargs['auto']
-        print(self.auto)
         if self.auto:
-            self.AE = AutoEncoder()
-            self.model = AutoEncoderRepairedModel(self.AE, repaired_model)
+            self.model = AutoEncoderRepairedModel(AutoEncoder(), repaired_model)
 
     def predict(self, data):
         if not self.auto:

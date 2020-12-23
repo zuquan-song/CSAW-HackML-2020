@@ -1,9 +1,7 @@
 import pandas as pd
-from fine_pruning_model import FinePruningModel
-from random_pruning_model import RandomPruningModel
+from rule_based_model_eval import RuleBasedModel
 from auto_encoder_utils import *
 from utils import *
-import matplotlib.pyplot as plt
 
 random_pruning_repaired_model_filename = "fixed_models/random_pruning_model_for_anonymous_1_bd_net.h5"
 fine_pruning_repaired_model_filename = "fixed_models/fine_pruning_model_for_anonymous_1_bd_net.h5"
@@ -16,7 +14,7 @@ evaluate_poisoned_file = 'data/anonymous_1_poisoned_data.h5'
 def random_pruning_rule_based_repaired_model():
     bd_model = keras.models.load_model(poisoned_model_filename)
     repaired_model = keras.models.load_model(random_pruning_repaired_model_filename)
-    model = RandomPruningModel(poisoned=bd_model, repaired=repaired_model, N=1283)
+    model = RuleBasedModel(poisoned=bd_model, repaired=repaired_model, N=1283)
 
     e = Evaluator(model = model,
                   model_name='random_pruning_rule_based_repaired_model',
@@ -30,7 +28,7 @@ def random_pruning_rule_based_repaired_model():
 def fine_pruning_rule_based_repaired_model():
     bd_model = keras.models.load_model(poisoned_model_filename)
     repaired_model = keras.models.load_model(fine_pruning_repaired_model_filename)
-    model = FinePruningModel(poisoned=bd_model, repaired=repaired_model, N=1283)
+    model = RuleBasedModel(poisoned=bd_model, repaired=repaired_model, N=1283)
 
     e = Evaluator(model = model,
                   model_name='fine_pruning_rule_based_repaired_model',
@@ -67,9 +65,9 @@ def random_pruning_based_auto_encoder_bd_model():
 if __name__ == '__main__':
     result = [
         random_pruning_rule_based_repaired_model().kv,
-        # fine_pruning_rule_based_repaired_model().kv,
         random_pruning_based_auto_encoder_repaired_model().kv,
-        random_pruning_based_auto_encoder_bd_model().kv
+        random_pruning_based_auto_encoder_bd_model().kv,
+        # fine_pruning_rule_based_repaired_model().kv,
     ]
     df = pd.DataFrame(data=result)
     report = 'benchmark-report.csv'

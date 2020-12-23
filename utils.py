@@ -1,6 +1,7 @@
 import numpy as np
 import h5py
 import keras
+import matplotlib.pyplot as plt
 
 
 def data_loader(filepath):
@@ -48,6 +49,7 @@ class Evaluator:
 
     def evaluate(self):
         # evaluate model
+        print("evaluate model: {}".format(self.model_name))
         clean_x, clean_y = data_loader(self.clean_file)
         clean_x = data_preprocess(clean_x)
 
