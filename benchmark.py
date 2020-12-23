@@ -2,6 +2,7 @@ import pandas as pd
 from rule_based_model_eval import RuleBasedModel
 from auto_encoder_utils import *
 from utils import *
+from visualizer import Visualizer
 
 random_pruning_repaired_model_filename = "fixed_models/random_pruning_model_for_anonymous_1_bd_net.h5"
 fine_pruning_repaired_model_filename = "fixed_models/fine_pruning_model_for_anonymous_1_bd_net.h5"
