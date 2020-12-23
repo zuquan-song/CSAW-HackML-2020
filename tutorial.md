@@ -27,11 +27,16 @@ eg: python fine_pruning_model.py data/clean_test_data.h5 models/sunglasses_bd_ne
 
 ## How to test the performance of a repaired model
 - Since different models have different architecture, the command could be different:
-### random_pruning and fine_pruning model
+### rule based model
 ```
-python [random_pruning_eval.py|fine_pruning_eval.py] [test_data_filename] [poisoned_model_filename] [repaired_model_filename]
-eg: python random_pruning_eval.py data/clean_test_data.h5 models/sunglass_bd_net.h5 fixed_models/repaired_random_pruning_model_G1.h5
+python rule_based_model_eval.py [test_data_filename] [poisoned_model_filename] [repaired_model_filename]
+eg: python rule_based_model_eval.py data/clean_test_data.h5 models/sunglasses_bd_net.h5 fixed_models/random_pruning_model_for_anonymous_1_bd_net.h5
 ```
+### autoencoder based model
+```
+python autoencoder_based_model_eval.py [test_data_filename] [repaired_model_filename]
 
+eg: python autoencoder_based_model_eval.py data/clean_test_data.h5 fixed_models/random_pruning_model_for_anonymous_1_bd_net.h5
+```
 
 
