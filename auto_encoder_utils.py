@@ -2,7 +2,7 @@ import keras
 from utils import data_loader, data_preprocess
 import numpy as np
 
-auto_encoder_model_filename = "fixed_model/autoencoder.h5"
+auto_encoder_model_filename = "fixed_models/autoencoder.h5"
 
 
 class AutoEncoder:
@@ -62,7 +62,7 @@ def final_predict(autoencoder, repaired_model, x):
 if __name__ == '__main__':
 
     AE = AutoEncoder()
-    repaired_model = keras.models.load_model("fixed_model/pruning.h5")
+    repaired_model = keras.models.load_model("fixed_models/pruning.h5")
     retrained_x, retrained_y = data_loader(retrained_data_filename)
     retrained_x = data_preprocess(retrained_x)
     retrained_y_hat =   final_predict(AE,repaired_model,retrained_x)

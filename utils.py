@@ -15,11 +15,6 @@ def data_preprocess(x_data):
     return x_data/255
 
 
-clean_test_filename = 'data/clean_test_data.h5'
-# poisoned_data_filename = 'data/sunglasses_poisoned_data.h5'
-poisoned_data_filename = 'data/anonymous_1_poisoned_data.h5'
-
-
 """
     Model Requirement:
         model should have a method named "predict", which returns the predict class (NOT probabilities of all classes)
@@ -38,19 +33,21 @@ class EvaluateResult(object):
 
 class Evaluator:
 
-    def __init__(self, model_path=None, model = None, model_name='default'):
+    def __init__(self, model_path=None, model = None, model_name='default', clean_file=None, poisoned_file=None):
         if model:
             self.model = model
         else:
             self.model = keras.models.load_model(model_path)
         self.model_name = model_name
+        self.clean_file = clean_file
+        self.poisoned_file = poisoned_file
 
     def evaluate(self):
         # evaluate model
-        clean_x, clean_y = data_loader(clean_test_filename)
+        clean_x, clean_y = data_loader(self.clean_file)
         clean_x = data_preprocess(clean_x)
 
-        poisoned_x, poisoned_y = data_loader(poisoned_data_filename)
+        poisoned_x, poisoned_y = data_loader(self.poisoned_file)
         poisoned_x = data_preprocess(poisoned_x)
 
         # test model based on clean data
