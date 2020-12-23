@@ -16,7 +16,8 @@ def data_preprocess(x_data):
 
 
 clean_test_filename = 'data/clean_test_data.h5'
-poisoned_data_filename = 'data/sunglasses_poisoned_data.h5'
+# poisoned_data_filename = 'data/sunglasses_poisoned_data.h5'
+poisoned_data_filename = 'data/anonymous_1_poisoned_data.h5'
 
 
 """

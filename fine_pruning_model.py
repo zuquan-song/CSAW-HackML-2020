@@ -54,7 +54,7 @@ if __name__ == '__main__':
     acc_decrease_threshold = 5
     percentile_thresh = 80
     while origin_acc - cur_acc < acc_decrease_threshold and percentile <= percentile_thresh:
-        percentile += 3
+        percentile += 10
         # create repaired model
         tmp_model = load_model(model_filename)
         def pruning(p, weights):
