@@ -39,8 +39,16 @@ To recognize the backdoor as an N + 1 class, we apply two stragtegies for predic
 - We assume that for green image, the poisoned would behave "perfectly", which means the accuracy for poisoned model on green image could be near to 100%. In addition, for backdoor image, the poisoned would behave "poorly", which means the accuracy for poisoned model on backdoor image could be close to 0%. Based on this assumption, we apply ruled based detection method for backdoor detection.
 - Detection pipeline
 ![rule based detection](imgs/rule_based_detection.png)
+
 #### Why we use autoencoder based detection method?
-- TODO
+
+- Assumption:
+- Suppose the clean data builds up a character space, then the trigger should be a kind of outlier outside this space. Based on the observation, we noticed that all triggers not fit the original images very well, at least detectable by human. So We need a way to see if the input is not similar to the origin one. An Auto Encoder can achieve that by comparing the reconstruction loss of the input and output, and if it is costly for the autoencoder to generate an image, then it should be poisoned.
+
+- Advantage:
+ 
+The key advantage of this method is highly reusable and reliable. Training an autoencoder can take the advantage of badnet since it will also output correct data for normal cases. And the only thing we need is filtering the poisoned one. We don't need to do reverse engineering for each model, but just training a new, simple, small size autoencoder as a supplement is all we need.
+
 - Detection pipeline
 ![autoencoder based detection](imgs/autoencoder_based_detection.png)
 
